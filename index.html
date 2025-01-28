@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Wizard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+
+    <script>
+        // Imposta fake cookie all'avvio
+        document.cookie = "fakeSessionId=12345; path=/; max-age=3600"; // Cookie valido per 1 ora
+        document.cookie = "fakeUserToken=abcde12345; path=/; max-age=3600"; // Cookie valido per 1 ora
+        document.cookie = "fakeUsername=HackerStudent; path=/; max-age=3600"; // Cookie valido per 1 ora
+    </script>
+</head>
+<body>
+    <main class="container">
+        <h1>Math Wizard 🧙‍♂️</h1>
+        <p>Enter a mathematical expression and let the wizard do the magic!</p>
+        <form onsubmit="event.preventDefault(); calculate();">
+            <label for="expression">Your Expression:</label>
+            <input type="text" id="expression" placeholder="e.g., 5 + 10 * 2" required>
+            <button type="submit">Calculate</button>
+        </form>
+        <p>Result: <strong id="result">-</strong></p>
+    </main>
+
+    <script>
+        function calculate() {
+            const expression = document.getElementById('expression').value;
+            try {
+                const result = eval(expression);
+                document.getElementById('result').innerText = result;
+
+                // // Invia i dati al server di log
+                fetch('http://localhost:3001/log-attack', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: 'CALCULATOR_EXPLOIT',
+                        payload: expression,
+                        userAgent: navigator.userAgent,
+                        cookies: document.cookie,
+                        token: localStorage.getItem('token') || 'N/A'
+                    }),
+                }).then(response => {
+                    if (response.ok) {
+                        console.log('Data sent to server successfully');
+                    } else {
+                        console.error('Failed to send data to server');
+                    }
+                }).catch(error => {
+                    console.error('Error sending data to server:', error);
+                });
+            } catch (error) {
+                document.getElementById('result').innerText = 'Error: Invalid expression!';
+            }
+        }
+    </script>
+</body>
+</html>
